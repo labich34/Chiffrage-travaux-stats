@@ -289,6 +289,21 @@ tbody tr:hover td{background:var(--glass-hover);color:var(--text)}
   </div>
 </div>
 
+<div class="page" id="page-interventions">
+  <div class="filter-bar">
+    <button class="filter-chip active" data-filter="all">Toutes</button>
+    <button class="filter-chip" data-filter="specialisee">⚡ Spécialisées</button>
+    <button class="filter-chip" data-filter="standard">Standard</button>
+    <span style="margin-left:auto"></span>
+    <select class="form-input" id="filterSite" style="width:auto;padding:.35rem .75rem;font-size:.78rem"><option value="all">Tous sites</option><option value="GD">Gland</option><option value="NC">Nyon Centre</option><option value="ND">Nyon Drive</option><option value="DIVERS">Divers</option><option value="SIEGE">Siège</option></select>
+    <select class="form-input" id="filterMonth" style="width:auto;padding:.35rem .75rem;font-size:.78rem"><option value="all">Tous mois</option></select>
+  </div>
+  <div class="card">
+    <div class="table-wrap"><table id="tableAll"><thead><tr><th>Date</th><th>Site</th><th>Travaux</th><th>Heures</th><th>Type</th><th>Int.</th><th>Ext.</th><th>Éco.</th><th></th></tr></thead><tbody></tbody></table></div>
+    <div class="empty-state" id="emptyInt" style="display:none"><div class="icon">📋</div><p>Aucune intervention</p></div>
+  </div>
+</div>
+
 <!-- CONTRATS EXTERNES -->
 <div class="page" id="page-contrats">
   <div class="card">
@@ -355,6 +370,7 @@ tbody tr:hover td{background:var(--glass-hover);color:var(--text)}
         <button class="btn btn-primary" onclick="exportPDF()" id="btnPDF" style="display:none;background:var(--green);color:#000">📄 PDF (imprimable)</button>
         <button class="btn btn-primary" onclick="exportInteractiveHTML()" id="btnHTML" style="display:none;background:linear-gradient(135deg,#60A5FA,#A78BFA);color:#fff">📧 Rapport interactif</button>
         <button class="btn btn-danger" onclick="clearRapport()" id="btnClearR" style="display:none">🗑 Effacer</button>
+
       </div>
     </div>
   </div>
@@ -379,7 +395,6 @@ tbody tr:hover td{background:var(--glass-hover);color:var(--text)}
   </div>
 </div>
 
-<!-- ========== PAGE GUIDE / DOCUMENTATION ========== -->
 <div class="page" id="page-doc">
   <div class="card">
     <div class="card-title">📖 Guide complet — Suivi Maintenance McDonald's La Côte</div>
@@ -496,7 +511,6 @@ tbody tr:hover td{background:var(--glass-hover);color:var(--text)}
   </div>
 </div>
 
-<!-- KPI MODAL -->
 <div class="kpi-modal-overlay" id="kpiModal">
   <div class="kpi-modal">
     <div class="kpi-modal-header">
@@ -505,6 +519,24 @@ tbody tr:hover td{background:var(--glass-hover);color:var(--text)}
     </div>
     <div id="kpiModalBody"></div>
   </div>
+</div>
+
+<!-- STUBS pour éléments supprimés (empêche les erreurs JS) -->
+<div style="display:none">
+  <input id="cfgConso"><input id="cfgDeplExt"><input id="cfgExterne"><input id="cfgHeuresContrat"><input id="cfgObjectif"><input id="cfgPrix">
+  <input id="deConso"><div id="deCostPreview"></div><input id="deDate"><input id="deFromLabel"><div id="deFromLibreWrap"></div><select id="deFromSite"></select><div id="deFromSiteWrap"></div><select id="deFromType"></select><input id="deKm"><textarea id="deMotif"></textarea><input id="dePrix"><input id="deToLabel"><div id="deToLibreWrap"></div><select id="deToSite"></select><div id="deToSiteWrap"></div><select id="deToType"></select>
+  <div id="deplExcFields"></div><div id="dexcLastEntries"></div>
+  <input id="eDate"><select id="eDepart"></select><textarea id="eDesc"></textarea><input id="eMateriel"><select id="eSite"></select><select id="eType"></select><div id="editModal" class="modal-overlay"></div>
+  <input id="fDate"><select id="fDepart"></select><div id="fDeplInfo"></div><textarea id="fDesc"></textarea><input id="fMateriel"><select id="fType"></select>
+  <div id="histContent"></div><select id="histMonth"></select><select id="histSite"></select><select id="histType"></select>
+  <input id="importFile" type="file">
+  <div id="interventionFields"></div>
+  <button id="modeDexcBtn"></button><button id="modeIntBtn"></button><button id="modeTTBtn"></button>
+  <div id="tempsFields"></div><div id="ttDeplInfo"></div><div id="ttEditModal" class="modal-overlay"></div><div id="ttLastEntries"></div>
+  <input id="tteDate"><input id="tteEnd"><textarea id="tteNote"></textarea><button id="tteRushBtn"></button><select id="tteSite"></select><input id="tteStart">
+  <div id="uDurBox"></div><div id="uDurVal"></div><input id="uEnd"><div id="uNoteWrap"></div><button id="uRushBtn"></button><div id="uSiteGrid"></div><input id="uStart"><div id="uStdFields"></div>
+  <div id="eDeplInfo"></div><div id="ePieces"></div><div id="eTags"></div><div id="fTags"></div><div id="fTagsTT"></div><div id="fPieces"></div>
+  <input id="cDate">
 </div>
 
 <div class="toast" id="toast"></div>
@@ -635,9 +667,7 @@ function setTags(cid,tv){
   document.querySelectorAll('#'+cid+' input[type="checkbox"]').forEach(function(c){c.checked=false});
   (tv||[]).forEach(function(t){var cb=document.querySelector('#'+cid+' input[value="'+t.id+'"]');if(cb)cb.checked=true});
 }
-try{buildTags('fTags')}catch(e){}
-try{buildTags('eTags')}catch(e){}
-try{buildTagsTT('fTagsTT')}catch(e){}
+try{buildTags('fTags');buildTags('eTags');buildTagsTT('fTagsTT');}catch(e){}
 
 // ========== DEPART INFO ==========
 function showDeplInfo(selectId,siteId,infoId){
@@ -1094,11 +1124,11 @@ function saveUnified(){
   resetUnifiedForm();refresh();
 }
 
-try{buildUSiteGrid()}catch(e){}
-try{resetUnifiedForm()}catch(e){}
-try{document.getElementById('fDepart').addEventListener('change',showDeplInfoUnified)}catch(e){}
-try{document.getElementById('fDate').addEventListener('change',showTTDeplInfo)}catch(e){}
-try{document.getElementById('uStart').addEventListener('change',showTTDeplInfo)}catch(e){}
+try{buildUSiteGrid();}catch(e){}
+try{resetUnifiedForm();}catch(e){}
+try{document.getElementById('fDepart').addEventListener('change',showDeplInfoUnified);}catch(e){}
+try{document.getElementById('fDate').addEventListener('change',showTTDeplInfo);}catch(e){}
+try{document.getElementById('uStart').addEventListener('change',showTTDeplInfo);}catch(e){}
 
 // ========== EDIT ==========
 var editId=null;
@@ -1286,7 +1316,7 @@ function renderLast(){
 function renderList(){
   var d=getFiltered();var tb=document.querySelector('#tableAll tbody');var em=document.getElementById('emptyInt');
   if(!d.length){tb.innerHTML='';em.style.display='block';return}em.style.display='none';
-  tb.innerHTML=d.map(function(i){var ci=coutInt(i),ce=coutExt(i),ep=ecoPieces(i),e=ce-ci+ep;return '<tr><td>'+fD(i.date)+'</td><td><span class="site-dot" style="background:'+(SITES[i.site]?SITES[i.site].color:'#888')+'"></span>'+(SITES[i.site]?SITES[i.site].name:i.site)+'</td><td><div class="desc-tags">'+tvLabel(i)+'</div></td><td>'+fH(totalH(i))+'</td><td><span class="badge '+(i.type==='specialisee'?'badge-spec':'badge-std')+'">'+(i.type==='specialisee'?'Spec.':'Std')+'</span></td><td>'+(ci>0?fmt(ci):'-')+'</td><td style="color:var(--red)">'+(ce>0?fmt(ce):'-')+'</td><td style="color:var(--green);font-weight:600">'+(e>0?fmt(e):'-')+(ep>0?'<span class="eco-piece-badge">dont '+fmt(ep)+' pieces</span>':'')+'</td></tr>'}).join('');
+  tb.innerHTML=d.map(function(i){var ci=coutInt(i),ce=coutExt(i),ep=ecoPieces(i),e=ce-ci+ep;return '<tr><td>'+fD(i.date)+'</td><td><span class="site-dot" style="background:'+(SITES[i.site]?SITES[i.site].color:'#888')+'"></span>'+(SITES[i.site]?SITES[i.site].name:i.site)+'</td><td><div class="desc-tags">'+tvLabel(i)+'</div></td><td>'+fH(totalH(i))+'</td><td><span class="badge '+(i.type==='specialisee'?'badge-spec':'badge-std')+'">'+(i.type==='specialisee'?'Spec.':'Std')+'</span></td><td>'+(ci>0?fmt(ci):'-')+'</td><td style="color:var(--red)">'+(ce>0?fmt(ce):'-')+'</td><td style="color:var(--green);font-weight:600">'+(e>0?fmt(e):'-')+(ep>0?'<span class="eco-piece-badge">dont '+fmt(ep)+' pieces</span>':'')+'</td><td><button class="btn btn-ghost btn-sm" onclick="openEdit('+i.id+')">✏️</button></td></tr>'}).join('');
 }
 
 // ========== CHARTS ==========
@@ -3474,8 +3504,8 @@ function refresh(){
   try{renderTTLastEntries()}catch(e){}
   try{renderDexcLastEntries()}catch(e){}
   try{initTrimestreSelect()}catch(e){}
+  try{document.getElementById('cDate').value=new Date().toISOString().slice(0,10)}catch(e){}
 }
-
 function handleDashImport(e){
   var f=e.target.files[0];if(!f)return;
   var r=new FileReader();
